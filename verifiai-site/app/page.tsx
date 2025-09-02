@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { motion } from "framer-motion";
 import {
@@ -37,7 +39,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 
 // ---- Utility components ----
-function Section({ id, children, className = "" }) {
+function Section({ id, children, className = "" }: { id: string; children: React.ReactNode; className?: string }) {
   return (
     <section id={id} className={`container mx-auto px-4 py-20 ${className}`}>
       {children}
@@ -45,7 +47,7 @@ function Section({ id, children, className = "" }) {
   );
 }
 
-function Pill({ children }) {
+function Pill({ children }: { children: React.ReactNode }) {
   return (
     <span className="inline-flex items-center rounded-full border border-slate-700 bg-slate-900/50 px-3 py-1 text-xs text-slate-200">
       {children}
@@ -234,7 +236,7 @@ function ProblemSolution() {
 }
 
 // ---- Product Tabs (MVP & Roadmap) ----
-function Feature({ icon: Icon, title, desc }) {
+function Feature({ icon: Icon, title, desc }: { icon: any; title: string; desc: string }) {
   return (
     <Card className="border-slate-800 bg-slate-900/60">
       <CardHeader>
@@ -247,7 +249,7 @@ function Feature({ icon: Icon, title, desc }) {
   );
 }
 
-function ProductTabs({ activeTab, onTabChange }) {
+function ProductTabs({ activeTab, onTabChange }: { activeTab: string; onTabChange: (value: string) => void }) {
   return (
     <div>
       <div className="mb-6 text-center">
@@ -295,10 +297,10 @@ function ProductTabs({ activeTab, onTabChange }) {
   );
 }
 
-function WorkflowIcon(props) {
+function WorkflowIcon(props: any) {
   return <Cpu {...props} />;
 }
-function BarIcon(props) {
+function BarIcon(props: any) {
   return <Database {...props} />;
 }
 
@@ -529,7 +531,7 @@ function FAQ() {
 function CTA() {
   return (
     <div id="cta" className="border-y border-slate-800/60 bg-slate-900/40">
-      <Section className="py-16">
+      <Section id="cta" className="py-16">
         <div className="mx-auto max-w-3xl text-center">
           <h3 className="text-3xl font-bold tracking-tight">Beta anfragen & 1 Gratis‑Check sichern</h3>
           <p className="mt-2 text-slate-300">Hinterlasse deine E‑Mail – wir melden uns mit Zugang zur Closed Beta.</p>
