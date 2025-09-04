@@ -29,6 +29,7 @@ A modern, AI-powered document verification system demo built with React, TypeScr
 - **Icons**: Lucide React
 - **Build Tool**: Vite
 - **Package Manager**: npm
+- **AI Integration**: OpenAI GPT-4 Vision API
 
 ## 📦 Installation
 
@@ -42,12 +43,22 @@ A modern, AI-powered document verification system demo built with React, TypeScr
    npm install
    ```
 
-3. **Start development server**
+3. **Configure OpenAI API (Optional)**
+   ```bash
+   # Copy environment template
+   cp env.example .env
+   
+   # Edit .env and add your OpenAI API key
+   VITE_OPENAI_API_KEY=your_openai_api_key_here
+   ```
+   > **Note**: Without an API key, the app will show mock data. See [OPENAI_SETUP.md](./OPENAI_SETUP.md) for detailed setup instructions.
+
+4. **Start development server**
    ```bash
    npm run dev
    ```
 
-4. **Open your browser**
+5. **Open your browser**
    Navigate to `http://localhost:3001`
 
 ## 🏗️ Build Commands
@@ -99,7 +110,8 @@ verifiai-product/
 - Multiple file support
 - Progress tracking
 - Verification type selection
-- Real-time processing simulation
+- Real-time AI-powered document analysis
+- OpenAI Vision API integration
 
 ### VerificationHistory
 - Comprehensive verification records
@@ -183,14 +195,27 @@ The application includes realistic mock data for:
 - Processing times
 - Confidence scores
 
+## 🤖 AI Integration
+
+The application now includes real AI-powered document analysis using OpenAI's GPT-4 Vision API:
+
+- **Document Analysis**: Automatic detection of document authenticity
+- **Multi-format Support**: PDF, JPG, PNG file analysis
+- **Confidence Scoring**: AI-generated confidence levels
+- **Risk Assessment**: Identification of potential issues
+- **Type-specific Validation**: Customized analysis for different document types
+
+See [OPENAI_SETUP.md](./OPENAI_SETUP.md) for detailed setup instructions.
+
 ## 📈 Future Enhancements
 
-- **Real API Integration**: Connect to actual verification services
+- **Enhanced AI Models**: Integration with specialized document verification services
 - **User Authentication**: Login and user management
 - **Advanced Analytics**: More detailed reporting and insights
 - **API Documentation**: Swagger/OpenAPI integration
 - **Testing Suite**: Unit and integration tests
 - **CI/CD Pipeline**: Automated deployment
+- **Backend Service**: Secure API key handling and rate limiting
 
 ## 🤝 Contributing
 

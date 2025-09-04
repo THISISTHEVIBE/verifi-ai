@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react'
 import { Upload, FileText, Image, File, X, CheckCircle, AlertCircle, Clock } from 'lucide-react'
+import { OpenAIService, DocumentAnalysisRequest } from '../services/openaiService'
 
 interface UploadedFile {
   id: string
@@ -62,55 +63,94 @@ const DocumentUpload: React.FC = () => {
 
     setUploadedFiles(prev => [...prev, ...newFiles])
 
-    // Simulate upload progress
+    // Process each file with real API
     newFiles.forEach(file => {
-      simulateUpload(file.id)
+      // Simulate upload progress first
+      let progress = 0
+      const uploadInterval = setInterval(() => {
+        progress += Math.random() * 20
+        if (progress >= 100) {
+          progress = 100
+          clearInterval(uploadInterval)
+          
+          setUploadedFiles(prev => prev.map(f => 
+            f.id === file.id 
+              ? { ...f, status: 'processing', progress: 100 }
+              : f
+          ))
+
+          // Start real document processing
+          processDocument(file.id, file)
+        } else {
+          setUploadedFiles(prev => prev.map(f => 
+            f.id === file.id 
+              ? { ...f, progress: Math.round(progress) }
+              : f
+          ))
+        }
+      }, 200)
     })
   }
 
-  const simulateUpload = (fileId: string) => {
-    let progress = 0
-    const interval = setInterval(() => {
-      progress += Math.random() * 20
-      if (progress >= 100) {
-        progress = 100
-        clearInterval(interval)
-        
-        setUploadedFiles(prev => prev.map(file => 
-          file.id === fileId 
-            ? { ...file, status: 'processing', progress: 100 }
-            : file
-        ))
+  const processDocument = async (fileId: string, file: File) => {
+    try {
+      // Update status to processing
+      setUploadedFiles(prev => prev.map(f => 
+        f.id === fileId 
+          ? { ...f, status: 'processing', progress: 50 }
+          : f
+      ))
 
-        // Simulate verification processing
-        setTimeout(() => {
-          const result = Math.random() > 0.1 ? 'verified' : 'suspicious'
-          const confidence = result === 'verified' ? 85 + Math.random() * 15 : 30 + Math.random() * 40
-          
-          setUploadedFiles(prev => prev.map(file => 
-            file.id === fileId 
-              ? { 
-                  ...file, 
-                  status: 'completed',
-                  verificationResult: {
-                    confidence: Math.round(confidence * 10) / 10,
-                    status: result as 'verified' | 'unverified' | 'suspicious',
-                    details: result === 'verified' 
-                      ? ['Document authenticity confirmed', 'Information matches database records']
-                      : ['Document requires manual review', 'Some information appears inconsistent']
-                  }
-                }
-              : file
-          ))
-        }, 2000)
-      } else {
-        setUploadedFiles(prev => prev.map(file => 
-          file.id === fileId 
-            ? { ...file, progress: Math.round(progress) }
-            : file
-        ))
+      // Check if API key is configured
+      const apiKey = import.meta.env.VITE_OPENAI_API_KEY
+      if (!apiKey || apiKey === 'your_openai_api_key_here') {
+        throw new Error('OpenAI API key not configured. Please set VITE_OPENAI_API_KEY in your environment variables.')
       }
-    }, 200)
+
+      // Prepare the analysis request
+      const analysisRequest: DocumentAnalysisRequest = {
+        file: file,
+        verificationType: verificationType as 'identity' | 'financial' | 'business' | 'academic'
+      }
+
+      // Call OpenAI service
+      const result = await OpenAIService.analyzeDocument(analysisRequest)
+
+      // Update with results
+      setUploadedFiles(prev => prev.map(f => 
+        f.id === fileId 
+          ? { 
+              ...f, 
+              status: 'completed',
+              progress: 100,
+              verificationResult: {
+                confidence: result.confidence,
+                status: result.status,
+                details: result.details
+              }
+            }
+          : f
+      ))
+
+    } catch (error) {
+      console.error('Error processing document:', error)
+      
+      // Update with error status
+      setUploadedFiles(prev => prev.map(f => 
+        f.id === fileId 
+          ? { 
+              ...f, 
+              status: 'failed',
+              progress: 100,
+              verificationResult: {
+                confidence: 0,
+                status: 'unverified',
+                details: [error instanceof Error ? error.message : 'Failed to process document']
+              }
+            }
+          : f
+      ))
+    }
   }
 
   const removeFile = (fileId: string) => {
@@ -298,13 +338,31 @@ const DocumentUpload: React.FC = () => {
         </div>
       )}
 
+      {/* API Configuration Notice */}
+      {(!import.meta.env.VITE_OPENAI_API_KEY || import.meta.env.VITE_OPENAI_API_KEY === 'your_openai_api_key_here') && (
+        <div className="card bg-yellow-50 border-yellow-200">
+          <h3 className="text-lg font-semibold text-yellow-900 mb-2">⚠️ API Configuration Required</h3>
+          <p className="text-yellow-800 mb-2">
+            To use real document analysis, you need to configure your OpenAI API key:
+          </p>
+          <ol className="list-decimal list-inside space-y-1 text-yellow-800 text-sm">
+            <li>Copy <code className="bg-yellow-100 px-1 rounded">env.example</code> to <code className="bg-yellow-100 px-1 rounded">.env</code></li>
+            <li>Add your OpenAI API key: <code className="bg-yellow-100 px-1 rounded">VITE_OPENAI_API_KEY=your_actual_key</code></li>
+            <li>Restart the development server</li>
+          </ol>
+          <p className="text-yellow-800 text-sm mt-2">
+            <strong>Note:</strong> This demo uses OpenAI's Vision API for document analysis. In production, API calls should be handled by a backend service for security.
+          </p>
+        </div>
+      )}
+
       {/* Instructions */}
       <div className="card bg-blue-50 border-blue-200">
         <h3 className="text-lg font-semibold text-blue-900 mb-2">How it works</h3>
         <ol className="list-decimal list-inside space-y-2 text-blue-800">
           <li>Select the type of document you want to verify</li>
           <li>Upload your document (PDF, JPG, PNG supported)</li>
-          <li>Our AI system analyzes the document for authenticity</li>
+          <li>Our AI system analyzes the document for authenticity using OpenAI's Vision API</li>
           <li>Get instant results with confidence scores and verification details</li>
         </ol>
       </div>
