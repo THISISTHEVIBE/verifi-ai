@@ -22,10 +22,15 @@ export interface DocumentAnalysisRequest {
 
 export class OpenAIService {
   /**
-   * Analyze a document using OpenAI's Vision API
+   * Analyze a document using OpenAI's multimodal API
    */
   static async analyzeDocument(request: DocumentAnalysisRequest): Promise<DocumentAnalysisResult> {
     try {
+      // Guard: only image files are supported in this demo
+      if (!request.file.type.startsWith('image/')) {
+        throw new Error('Only image files (JPG/PNG) are supported right now. PDF analysis is not yet implemented in this demo.')
+      }
+
       // Convert file to base64
       const base64Image = await this.fileToBase64(request.file)
       
@@ -34,7 +39,7 @@ export class OpenAIService {
       
       // Call OpenAI Vision API
       const response = await openai.chat.completions.create({
-        model: "gpt-4-vision-preview",
+        model: "gpt-4o-mini",
         messages: [
           {
             role: "user",
@@ -62,8 +67,11 @@ export class OpenAIService {
       return this.parseAnalysisResponse(analysisText, request.verificationType)
       
     } catch (error) {
-      console.error('Error analyzing document:', error)
-      throw new Error('Failed to analyze document. Please try again.')
+      // Surface more helpful error messages to the UI
+      const anyErr = error as any
+      const apiMsg = anyErr?.error?.message || anyErr?.response?.data?.error?.message || anyErr?.message
+      console.error('Error analyzing document:', anyErr)
+      throw new Error(apiMsg || 'Failed to analyze document. Please try again.')
     }
   }
 

@@ -9,6 +9,7 @@ interface UploadedFile {
   type: string
   status: 'uploading' | 'processing' | 'completed' | 'failed'
   progress: number
+  originalFile: File
   verificationResult?: {
     confidence: number
     status: 'verified' | 'unverified' | 'suspicious'
@@ -52,41 +53,38 @@ const DocumentUpload: React.FC = () => {
   }
 
   const handleFiles = (files: File[]) => {
-    const newFiles: UploadedFile[] = files.map(file => ({
+    // Build and append UI entries that keep a pointer to the original File (Blob)
+    const uiEntries: UploadedFile[] = files.map((blob) => ({
       id: Math.random().toString(36).substr(2, 9),
-      name: file.name,
-      size: file.size,
-      type: file.type,
+      name: blob.name,
+      size: blob.size,
+      type: blob.type,
       status: 'uploading',
-      progress: 0
+      progress: 0,
+      originalFile: blob,
     }))
 
-    setUploadedFiles(prev => [...prev, ...newFiles])
+    setUploadedFiles((prev) => [...prev, ...uiEntries])
 
-    // Process each file with real API
-    newFiles.forEach(file => {
-      // Simulate upload progress first
+    // Simulate upload progress and then process with the real API
+    uiEntries.forEach((uiFile) => {
       let progress = 0
       const uploadInterval = setInterval(() => {
         progress += Math.random() * 20
         if (progress >= 100) {
           progress = 100
           clearInterval(uploadInterval)
-          
-          setUploadedFiles(prev => prev.map(f => 
-            f.id === file.id 
-              ? { ...f, status: 'processing', progress: 100 }
-              : f
-          ))
 
-          // Start real document processing
-          processDocument(file.id, file)
+          setUploadedFiles((prev) =>
+            prev.map((f) => (f.id === uiFile.id ? { ...f, status: 'processing', progress: 100 } : f))
+          )
+
+          // Start real document processing with the original Blob
+          processDocument(uiFile.id, uiFile.originalFile)
         } else {
-          setUploadedFiles(prev => prev.map(f => 
-            f.id === file.id 
-              ? { ...f, progress: Math.round(progress) }
-              : f
-          ))
+          setUploadedFiles((prev) =>
+            prev.map((f) => (f.id === uiFile.id ? { ...f, progress: Math.round(progress) } : f))
+          )
         }
       }, 200)
     })
@@ -241,12 +239,12 @@ const DocumentUpload: React.FC = () => {
             Drop files here or click to browse
           </h4>
           <p className="text-gray-600 mb-4">
-            Support for PDF, JPG, PNG files up to 10MB each
+            Support for JPG and PNG files up to 10MB each
           </p>
           <input
             type="file"
             multiple
-            accept=".pdf,.jpg,.jpeg,.png"
+            accept=".jpg,.jpeg,.png"
             onChange={handleFileInput}
             className="hidden"
             id="file-upload"
