@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { useSession, signIn, signOut } from "next-auth/react";
 import {
   ArrowRight,
   BadgeCheck,
@@ -96,6 +97,7 @@ export default function VerifiAI() {
 
 // ---- Navbar ----
 function Nav() {
+  const { data: session, status } = useSession();
   return (
     <div className="sticky top-0 z-50 w-full border-b border-slate-800/60 bg-slate-950/70 backdrop-blur">
       <div className="container mx-auto flex items-center justify-between px-4 py-3">
@@ -111,14 +113,21 @@ function Nav() {
           <a href="#faq" className="text-slate-300 hover:text-white">FAQ</a>
         </nav>
         <div className="flex items-center gap-2">
-          <Button asChild size="sm" variant="outline" className="border-slate-700 text-slate-200">
-            <a href="#cta">Beta anfragen</a>
-          </Button>
-          <Button asChild size="sm" className="bg-emerald-500 hover:bg-emerald-400">
-            <a href="#cta" className="inline-flex items-center gap-1">
-              1 Gratis‑Check <ArrowRight className="h-4 w-4" />
-            </a>
-          </Button>
+          {status === "authenticated" && session?.user ? (
+            <div className="flex items-center gap-3">
+              {session.user.image ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={session.user.image} alt={session.user.name ?? session.user.email ?? "user"} className="h-7 w-7 rounded-full border border-slate-700" />
+              ) : null}
+              <span className="hidden text-sm text-slate-300 sm:inline">{session.user.name ?? session.user.email}</span>
+              <Button size="sm" variant="outline" className="border-slate-700 text-slate-200" onClick={() => signOut()}>Sign out</Button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Button size="sm" variant="outline" className="border-slate-700 text-slate-200" onClick={() => signIn("github")}>Sign in with GitHub</Button>
+              <Button size="sm" className="bg-emerald-500 hover:bg-emerald-400" onClick={() => signIn("google")}>Sign in with Google</Button>
+            </div>
+          )}
         </div>
       </div>
     </div>
