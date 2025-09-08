@@ -1,6 +1,7 @@
-import React, { useState, useCallback } from 'react'
-import { Upload, FileText, Image, File, X, CheckCircle, AlertCircle, Clock } from 'lucide-react'
+import React, { useState, useCallback, useRef } from 'react'
+import { Upload, FileText, X, CheckCircle, AlertCircle, Clock } from 'lucide-react'
 import { OpenAIService, DocumentAnalysisRequest } from '../services/openaiService'
+import { addEvent as addMetricsEvent, VerificationCategory, VerificationOutcome } from '../services/metricsService'
 
 interface UploadedFile {
   id: string
@@ -21,6 +22,8 @@ const DocumentUpload: React.FC = () => {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
   const [isDragOver, setIsDragOver] = useState(false)
   const [verificationType, setVerificationType] = useState('identity')
+  // Track when each file started (upload begin) to compute processing duration
+  const startTimesRef = useRef<Record<string, number>>({})
 
   const verificationTypes = [
     { id: 'identity', label: 'Identity Documents', description: 'Passports, ID cards, driver licenses' },
@@ -68,6 +71,8 @@ const DocumentUpload: React.FC = () => {
 
     // Simulate upload progress and then process with the real API
     uiEntries.forEach((uiFile) => {
+      // record start time
+      startTimesRef.current[uiFile.id] = Date.now()
       let progress = 0
       const uploadInterval = setInterval(() => {
         progress += Math.random() * 20
@@ -130,6 +135,20 @@ const DocumentUpload: React.FC = () => {
           : f
       ))
 
+      // Record metrics event
+      const startedAt = startTimesRef.current[fileId] || Date.now()
+      const outcome: VerificationOutcome = result.status
+      addMetricsEvent({
+        id: fileId,
+        documentName: file.name,
+        bytes: file.size,
+        category: verificationType as VerificationCategory,
+        outcome,
+        confidence: result.confidence,
+        startedAt,
+        completedAt: Date.now(),
+      })
+
     } catch (error) {
       console.error('Error processing document:', error)
       
@@ -148,6 +167,19 @@ const DocumentUpload: React.FC = () => {
             }
           : f
       ))
+
+      // Record failed metrics event
+      const startedAt = startTimesRef.current[fileId] || Date.now()
+      addMetricsEvent({
+        id: fileId,
+        documentName: file.name,
+        bytes: file.size,
+        category: verificationType as VerificationCategory,
+        outcome: 'failed',
+        confidence: null,
+        startedAt,
+        completedAt: Date.now(),
+      })
     }
   }
 

@@ -1,11 +1,14 @@
-import React, { useState } from 'react'
-import { TrendingUp, TrendingDown, Users, Clock, CheckCircle, XCircle, BarChart3, Calendar, Download } from 'lucide-react'
+import React, { useState, useMemo } from 'react'
+import { TrendingUp, TrendingDown, Users, Clock, CheckCircle, BarChart3, Download } from 'lucide-react'
+import { getAggregatedMetrics, TimeRange } from '../services/metricsService'
 
 const Analytics: React.FC = () => {
   const [timeRange, setTimeRange] = useState('30d')
 
-  // Mock data for analytics
-  const metrics = {
+  // Prefer real aggregated metrics if available; otherwise use mock data
+  const aggregated = useMemo(() => getAggregatedMetrics(timeRange as TimeRange), [timeRange])
+
+  const mockMetrics = {
     totalVerifications: 1234,
     successRate: 94.2,
     avgProcessingTime: 2.3,
@@ -41,6 +44,8 @@ const Analytics: React.FC = () => {
     ]
   }
 
+  const metrics = aggregated || mockMetrics
+
   const timeRangeOptions = [
     { value: '7d', label: 'Last 7 days' },
     { value: '30d', label: 'Last 30 days' },
@@ -48,22 +53,7 @@ const Analytics: React.FC = () => {
     { value: '1y', label: 'Last year' }
   ]
 
-  const getTrendIcon = (value: number, previousValue: number) => {
-    const change = value - previousValue
-    if (change > 0) {
-      return <TrendingUp className="w-4 h-4 text-success-600" />
-    } else if (change < 0) {
-      return <TrendingDown className="w-4 h-4 text-error-600" />
-    }
-    return null
-  }
-
-  const getTrendColor = (value: number, previousValue: number) => {
-    const change = value - previousValue
-    if (change > 0) return 'text-success-600'
-    if (change < 0) return 'text-error-600'
-    return 'text-gray-600'
-  }
+  // (removed unused trend helpers)
 
   const formatNumber = (num: number) => {
     return new Intl.NumberFormat().format(num)
@@ -91,13 +81,13 @@ const Analytics: React.FC = () => {
     )
   }
 
-  const renderHorizontalBarChart = (data: Array<{ type: string; count: number; percentage: number }>) => {
+  const renderHorizontalBarChart = (data: Array<{ type?: string; range?: string; count: number; percentage: number }>) => {
     return (
       <div className="space-y-3">
         {data.map((item, index) => (
           <div key={index}>
             <div className="flex justify-between text-sm mb-1">
-              <span className="text-gray-700">{item.type}</span>
+              <span className="text-gray-700">{item.type ?? item.range}</span>
               <span className="text-gray-600">{item.percentage}%</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
