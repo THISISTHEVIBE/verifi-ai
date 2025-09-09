@@ -34,3 +34,43 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+---
+
+## Setup Authentication (NextAuth)
+
+This project includes a configured App Router NextAuth endpoint at `app/api/auth/[...nextauth]/route.ts` with GitHub and Google providers.
+
+1. Create a `.env.local` in `verifiai-site/` with:
+
+```
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your_random_secret
+
+GITHUB_ID=your_github_oauth_client_id
+GITHUB_SECRET=your_github_oauth_client_secret
+
+GOOGLE_CLIENT_ID=your_google_oauth_client_id
+GOOGLE_CLIENT_SECRET=your_google_oauth_client_secret
+```
+
+2. Restart the dev server: `npm run dev`
+
+3. In the UI, use the Sign in buttons in the navbar.
+
+Notes:
+- The SessionProvider is wired in `app/layout.tsx` via `components/AuthProvider.tsx`.
+- Cookies are managed by NextAuth; JWT strategy is enabled.
+
+---
+
+## Legal & Security Pages
+
+The following pages are scaffolded and linked from the site footer:
+
+- `/terms` – Terms of Service (placeholder)
+- `/privacy` – Privacy Policy (placeholder)
+- `/imprint` – Impressum (placeholder)
+- `/security` – Security & Compliance overview (placeholder)
+
+A lightweight cookie consent banner is included via `components/ui/CookieBanner.tsx` and rendered in `app/layout.tsx`.

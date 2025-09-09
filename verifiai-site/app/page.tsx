@@ -569,15 +569,18 @@ function Footer() {
           <Logo />
           <span className="font-medium text-slate-200">Verifi AI</span>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-4">
           <a className="inline-flex items-center gap-1 hover:text-slate-200" href="mailto:hello@verifiai.app"><Mail className="h-4 w-4" /> hello@verifiai.app</a>
           <a className="inline-flex items-center gap-1 hover:text-slate-200" href="#"><Linkedin className="h-4 w-4" /> LinkedIn</a>
-          <a className="inline-flex items-center gap-1 hover:text-slate-200" href="#"><Globe className="h-4 w-4" /> Impressum</a>
+          <a className="inline-flex items-center gap-1 hover:text-slate-200" href="/imprint"><Globe className="h-4 w-4" /> Impressum</a>
+          <a className="inline-flex items-center gap-1 hover:text-slate-200" href="/privacy">Datenschutz</a>
+          <a className="inline-flex items-center gap-1 hover:text-slate-200" href="/terms">AGB</a>
+          <a className="inline-flex items-center gap-1 hover:text-slate-200" href="/security">Sicherheit</a>
         </div>
       </div>
       <Separator className="my-6 bg-slate-800" />
       <p className="text-center text-xs text-slate-500">
-        © {new Date().getFullYear()} Verifi AI • Kein Ersatz für Rechtsberatung • Alle Preise zzgl. USt.
+        {new Date().getFullYear()} Verifi AI • Kein Ersatz für Rechtsberatung • Alle Preise zzgl. USt.
       </p>
     </footer>
   );

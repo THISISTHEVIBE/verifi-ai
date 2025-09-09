@@ -16,9 +16,37 @@ Use the checkboxes to track progress. Replace placeholders like [Owner] and [Dat
 
 ## 1) Product Scope to MVP-Sellable
 
-- [ ] Define MVP surface and “done” criteria
-  - Owner: [Owner] • Target: [Date]
+- [x] Define MVP surface and “done” criteria
+  - Owner: Cascade • Target: 2025-09-09
   - Acceptance: One-pager with feature list, out-of-scope items, SLAs, and guardrails
+
+### MVP One-Pager
+- Vision: KMU‑freundliche Vertragsanalyse, die Risiken, Fristen und Verhandlungspunkte automatisch markiert, erklärt und planbar macht – ohne juristisches Vorwissen.
+- Target Users: KMUs (10–500 MA), Startups, Bau/Handwerk, E‑Commerce (EU‑fokus)
+- Primary Jobs-To-Be-Done:
+  1) Vertrag schnell prüfen und Risiken verstehen
+  2) Fristen im Blick behalten und rechtzeitig erinnert werden
+  3) Ergebnisse mit Team teilen oder als Report exportieren
+- Features (MVP scope):
+  - Authentifizierung (GitHub/Google/Email) und Organisations‑Onboarding (Owner/Admin/Member)
+  - Upload von PDF/DOCX (EU‑Region Storage, Virenscan, Größen/Typ‑Validierung)
+  - Serverseitige AI‑Analyse: Risiko‑Score, Erklärungen, Verlinkung zur Textstelle
+  - Findings Übersicht: Haftung, Verlängerung, Zahlungsziele, Kündigungsfristen
+  - Fristen‑Kalender + E‑Mail‑Reminder
+  - History & Audit‑Trail (Such/Filter)
+  - Export: PDF (Bericht) und CSV (Metadaten)
+  - Abrechnung: Pay‑per‑Contract (€29) + SMB Subscription (€99/Monat, 20 Verträge)
+- Out‑of‑Scope (MVP):
+  - Mehrsprachigkeit jenseits DE/EN
+  - Deep integrations (DocuSign/Drive/Teams), Benchmarking, Verhandlungsvorschläge
+  - Mobile Apps (iOS/Android)
+- SLAs (MVP):
+  - Analyse Enqueue p95 < 5s, Verarbeitungszeit p95 < 60s für typische Verträge (≤10MB)
+  - Uptime Ziel: 99.5% (Beta), Support Antwortzeit < 1 Werktag
+- Guardrails & Compliance:
+  - Klarer Disclaimer: Keine Rechtsberatung
+  - EU Data Residency, Verschlüsselung at‑rest/in‑transit, PII‑Scrubbing in Logs
+  - RBAC, Audit‑Logs, Datenlöschung auf Anforderung, konfigurierbare Retention
 
 - [ ] Core User Flows (E2E)
   - [ ] Onboarding: signup → verify email → create org → invite team
@@ -42,7 +70,7 @@ Use the checkboxes to track progress. Replace placeholders like [Owner] and [Dat
     - Owner: [Owner] • Target: [Date]
     - Acceptance: ADR committed; folder scaffolding in `/api/` or separate repo/service
   - [ ] AuthN/AuthZ
-    - [ ] Implement NextAuth in `verifiai-site/` with configured providers (GitHub/Google + Email)
+    - [x] Implement NextAuth in `verifiai-site/` with configured providers (GitHub/Google + Email)
     - [ ] JWT/session storage, CSRF, secure cookies
     - [ ] Role-based access (owner, admin, member)
   - [ ] Contracts ingestion & storage
@@ -109,20 +137,20 @@ Use the checkboxes to track progress. Replace placeholders like [Owner] and [Dat
   - [ ] DPA template ready for customers
   - [ ] Subprocessor list (OpenAI/Anthropic, cloud, email)
 - [ ] Security docs
-  - [ ] Security overview page on marketing site
+  - [x] Security overview page on marketing site
   - [ ] Pen-test plan or vendor
 
 ---
 
 ## 4) Legal & Policy
 
-- [ ] Website legal pages in `verifiai-site/`
-  - [ ] Terms of Service
-  - [ ] Privacy Policy (GDPR compliant)
-  - [ ] Imprint/Impressum (if applicable)
-  - [ ] Cookie Policy & Consent banner
+- [x] Website legal pages in `verifiai-site/`
+  - [x] Terms of Service
+  - [x] Privacy Policy (GDPR compliant)
+  - [x] Imprint/Impressum (if applicable)
+  - [x] Cookie Policy & Consent banner
   - [ ] Data Processing Addendum (DPA)
-  - [ ] Disclaimer: “Kein Ersatz für Rechtsberatung”
+  - [x] Disclaimer: “Kein Ersatz für Rechtsberatung”
 - [ ] Product legal
   - [ ] In-app consent and disclaimers
   - [ ] Licensing & OSS notices
