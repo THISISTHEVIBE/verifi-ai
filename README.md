@@ -94,3 +94,9 @@ Verifi AI scannt **Miet-, Arbeits- und Lieferverträge** und markiert automatisc
 
 ## 🚀 Investor Story
 > „Verifi AI AI ist der **Turbo für Vertrags-Checks in KMUs**: Wir demokratisieren den Zugang zu Vertragsintelligenz. Statt blind zu unterschreiben, haben kleine Firmen endlich **die gleiche Contract-Power wie Konzerne** – für einen Bruchteil der Kosten.“  
+
+---
+
+## 📋 Sales Readiness Plan
+Für den vollständigen, umsetzbaren Plan zur Marktreife (Engineering, Security/Privacy, Legal, Billing, GTM, Support & Ops) siehe:
+- [SALES_READINESS.md](./SALES_READINESS.md)
