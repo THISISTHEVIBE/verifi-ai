@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useRef } from 'react'
 import { Upload, FileText, X, CheckCircle, AlertCircle, Clock } from 'lucide-react'
-import { OpenAIService, DocumentAnalysisRequest } from '../services/openaiService'
 import { addEvent as addMetricsEvent, VerificationCategory, VerificationOutcome } from '../services/metricsService'
+import { uploadDocument, startAnalysis } from '../services/backendService'
 
 interface UploadedFile {
   id: string
@@ -104,22 +104,16 @@ const DocumentUpload: React.FC = () => {
           : f
       ))
 
-      // Check if API key is configured
-      const apiKey = import.meta.env.VITE_OPENAI_API_KEY
-      if (!apiKey || apiKey === 'your_openai_api_key_here') {
-        throw new Error('OpenAI API key not configured. Please set VITE_OPENAI_API_KEY in your environment variables.')
-      }
-
-      // Prepare the analysis request
-      const analysisRequest: DocumentAnalysisRequest = {
-        file: file,
-        verificationType: verificationType as 'identity' | 'financial' | 'business' | 'academic'
-      }
-
-      // Call OpenAI service
-      const result = await OpenAIService.analyzeDocument(analysisRequest)
+      // Upload document to backend and start analysis
+      const uploaded = await uploadDocument(file, verificationType)
+      const result = await startAnalysis({
+        documentId: uploaded.id,
+        documentName: uploaded.name,
+        category: verificationType,
+      })
 
       // Update with results
+      const uiStatus: 'verified' | 'unverified' | 'suspicious' = (result.outcome === 'failed' ? 'unverified' : (result.outcome as any))
       setUploadedFiles(prev => prev.map(f => 
         f.id === fileId 
           ? { 
@@ -128,8 +122,8 @@ const DocumentUpload: React.FC = () => {
               progress: 100,
               verificationResult: {
                 confidence: result.confidence,
-                status: result.status,
-                details: result.details
+                status: uiStatus,
+                details: result.findings?.map((ff) => ff.summary) ?? []
               }
             }
           : f
@@ -137,10 +131,10 @@ const DocumentUpload: React.FC = () => {
 
       // Record metrics event
       const startedAt = startTimesRef.current[fileId] || Date.now()
-      const outcome: VerificationOutcome = result.status
+      const outcome: VerificationOutcome = result.outcome
       addMetricsEvent({
         id: fileId,
-        documentName: file.name,
+        documentName: uploaded?.name || file.name,
         bytes: file.size,
         category: verificationType as VerificationCategory,
         outcome,
@@ -353,7 +347,7 @@ const DocumentUpload: React.FC = () => {
                   <div className="mt-3 pt-3 border-t border-gray-200">
                     <p className="text-sm font-medium text-gray-700 mb-2">Verification Details:</p>
                     <ul className="space-y-1">
-                      {file.verificationResult.details.map((detail, index) => (
+                      {file.verificationResult.details.map((detail: string, index: number) => (
                         <li key={index} className="text-sm text-gray-600 flex items-center space-x-2">
                           <div className="w-1.5 h-1.5 bg-gray-400 rounded-full" />
                           <span>{detail}</span>
@@ -367,34 +361,12 @@ const DocumentUpload: React.FC = () => {
           </div>
         </div>
       )}
-
-      {/* API Configuration Notice */}
-      {(!import.meta.env.VITE_OPENAI_API_KEY || import.meta.env.VITE_OPENAI_API_KEY === 'your_openai_api_key_here') && (
-        <div className="card bg-yellow-50 border-yellow-200">
-          <h3 className="text-lg font-semibold text-yellow-900 mb-2">⚠️ API Configuration Required</h3>
-          <p className="text-yellow-800 mb-2">
-            To use real document analysis, you need to configure your OpenAI API key:
-          </p>
-          <ol className="list-decimal list-inside space-y-1 text-yellow-800 text-sm">
-            <li>Copy <code className="bg-yellow-100 px-1 rounded">env.example</code> to <code className="bg-yellow-100 px-1 rounded">.env</code></li>
-            <li>Add your OpenAI API key: <code className="bg-yellow-100 px-1 rounded">VITE_OPENAI_API_KEY=your_actual_key</code></li>
-            <li>Restart the development server</li>
-          </ol>
-          <p className="text-yellow-800 text-sm mt-2">
-            <strong>Note:</strong> This demo uses OpenAI's Vision API for document analysis. In production, API calls should be handled by a backend service for security.
-          </p>
-        </div>
-      )}
-
-      {/* Instructions */}
+      {/* API Notice */}
       <div className="card bg-blue-50 border-blue-200">
-        <h3 className="text-lg font-semibold text-blue-900 mb-2">How it works</h3>
-        <ol className="list-decimal list-inside space-y-2 text-blue-800">
-          <li>Select the type of document you want to verify</li>
-          <li>Upload your document (PDF, JPG, PNG supported)</li>
-          <li>Our AI system analyzes the document for authenticity using OpenAI's Vision API</li>
-          <li>Get instant results with confidence scores and verification details</li>
-        </ol>
+        <h3 className="text-lg font-semibold text-blue-900 mb-2">Backend API in use</h3>
+        <p className="text-blue-800 text-sm">
+          Document processing is routed through the backend API. Set <code className="bg-blue-100 px-1 rounded">VITE_API_BASE</code> in <code className="bg-blue-100 px-1 rounded">.env</code> if your site runs on a different origin.
+        </p>
       </div>
     </div>
   )

@@ -66,8 +66,8 @@ Use the checkboxes to track progress. Replace placeholders like [Owner] and [Dat
 ## 2) Engineering: Architecture & Delivery
 
 - Backend/API Service (FastAPI or Node/Next API OK; choose one)
-  - [ ] Architecture decision record (ADR) for backend
-    - Owner: [Owner] • Target: [Date]
+  - [x] Architecture decision record (ADR) for backend
+    - Owner: Cascade • Target: 2025-09-10
     - Acceptance: ADR committed; folder scaffolding in `/api/` or separate repo/service
   - [ ] AuthN/AuthZ
     - [x] Implement NextAuth in `verifiai-site/` with configured providers (GitHub/Google + Email)

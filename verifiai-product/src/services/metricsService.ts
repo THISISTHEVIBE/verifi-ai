@@ -18,6 +18,7 @@ export interface VerificationEvent {
 export type TimeRange = '7d' | '30d' | '90d' | '1y'
 
 const STORAGE_KEY = 'verifiai:events:v1'
+const API_BASE: string = (import.meta as any)?.env?.VITE_API_BASE || 'http://localhost:3000'
 
 function readAll(): VerificationEvent[] {
   try {
@@ -43,6 +44,17 @@ export function addEvent(evt: VerificationEvent) {
   const all = readAll()
   all.push(evt)
   writeAll(all)
+  // Best-effort: forward to backend metrics endpoint
+  try {
+    fetch(`${API_BASE}/api/metrics`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(evt),
+      keepalive: true,
+    }).catch(() => {})
+  } catch {
+    // ignore network errors in demo
+  }
 }
 
 function rangeToSinceMs(range: TimeRange): number {
