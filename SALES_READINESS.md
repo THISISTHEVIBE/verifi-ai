@@ -78,7 +78,7 @@ Use the checkboxes to track progress. Replace placeholders like [Owner] and [Dat
     - [ ] File virus scanning (e.g., ClamAV/Lambda or third-party)
     - [ ] PDF/DOCX parsing pipeline
   - [ ] AI analysis pipeline
-    - [ ] Server-side calls to LLMs; no API key in frontend
+    - [x] Server-side calls to LLMs; no API key in frontend
     - [ ] Prompt templates & safety filters
     - [ ] Retry, timeout, circuit breaker; full request/response logging with PII scrubbing
   - [ ] Data model & DB
@@ -90,9 +90,10 @@ Use the checkboxes to track progress. Replace placeholders like [Owner] and [Dat
     - [ ] PDF report generation service
 
 - Frontend (`verifiai-product/`)
-  - [ ] Remove direct `openai` usage from client. Route via backend.
-  - [ ] Replace localStorage metrics with backend metrics endpoints (see `src/services/metricsService.ts`).
-  - [ ] Add authenticated routes + org context + feature flags
+  - [x] Remove direct `openai` usage from client. Route via backend.
+  - [x] Replace localStorage metrics with backend metrics endpoints (see `src/services/metricsService.ts`).
+  - [x] Add authenticated routes (gated UI with sign-in prompt)
+  - [ ] Org context + feature flags
 
 - Observability & Ops
   - [ ] Logging (structured JSON, correlation IDs)

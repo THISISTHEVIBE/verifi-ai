@@ -1,9 +1,15 @@
 import { NextRequest } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 // Temporary in-memory store for demo; replace with DB in future steps
 let demoEvents: any[] = [];
 
 export async function GET() {
+  const session = await getServerSession(authOptions as any);
+  if (!session) {
+    return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401 });
+  }
   return new Response(
     JSON.stringify({
       totalVerifications: demoEvents.length,
@@ -14,6 +20,10 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const session = await getServerSession(authOptions as any);
+  if (!session) {
+    return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401 });
+  }
   try {
     const body = await req.json();
     if (!body || typeof body !== "object") {

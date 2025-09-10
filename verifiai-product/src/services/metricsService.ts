@@ -15,6 +15,19 @@ export interface VerificationEvent {
   completedAt: number // epoch ms
 }
 
+// Fetch recent events from backend (if available)
+export async function fetchServerEvents(): Promise<VerificationEvent[] | null> {
+  try {
+    const res = await fetch(`${API_BASE}/api/metrics`, { method: 'GET', headers: { 'accept': 'application/json' } })
+    if (!res.ok) return null
+    const data = await res.json()
+    if (Array.isArray(data?.events)) return data.events as VerificationEvent[]
+    return null
+  } catch {
+    return null
+  }
+}
+
 export type TimeRange = '7d' | '30d' | '90d' | '1y'
 
 const STORAGE_KEY = 'verifiai:events:v1'
@@ -89,6 +102,10 @@ export interface AggregatedMetrics {
 
 export function getAggregatedMetrics(range: TimeRange): AggregatedMetrics | null {
   const events = getEvents(range)
+  return computeAggregatedFromEvents(events, range)
+}
+
+export function computeAggregatedFromEvents(events: VerificationEvent[], range: TimeRange): AggregatedMetrics | null {
   if (events.length === 0) return null
 
   const now = new Date()

@@ -1,14 +1,32 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Shield, CheckCircle, AlertTriangle, XCircle, Upload, FileText, Search, BarChart3, Settings, User } from 'lucide-react'
 import VerificationDashboard from './components/VerificationDashboard'
 import DocumentUpload from './components/DocumentUpload'
 import VerificationHistory from './components/VerificationHistory'
 import Analytics from './components/Analytics'
+import SignInPrompt from './components/SignInPrompt'
+import { getSession, getSignOutUrl } from './services/authService'
 
 type TabType = 'dashboard' | 'upload' | 'history' | 'analytics'
 
 function App() {
   const [activeTab, setActiveTab] = useState<TabType>('dashboard')
+  const [authChecked, setAuthChecked] = useState(false)
+  const [authenticated, setAuthenticated] = useState(false)
+  const [userName, setUserName] = useState<string | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      const s = await getSession()
+      if (!cancelled) {
+        setAuthenticated(!!s.authenticated)
+        setUserName(s.user?.name || s.user?.email || null)
+        setAuthChecked(true)
+      }
+    })()
+    return () => { cancelled = true }
+  }, [])
 
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: Shield },
@@ -32,6 +50,14 @@ function App() {
     }
   }
 
+  if (!authChecked) {
+    return <div className="min-h-screen bg-gray-50" />
+  }
+
+  if (!authenticated) {
+    return <SignInPrompt />
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -46,12 +72,10 @@ function App() {
             </div>
             
             <div className="flex items-center space-x-4">
-              <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
-                <Settings className="w-5 h-5" />
-              </button>
-              <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+              <span className="text-sm text-gray-600 hidden sm:inline">{userName || 'Signed in'}</span>
+              <a href={getSignOutUrl()} className="p-2 text-gray-400 hover:text-gray-600 transition-colors" title="Sign out">
                 <User className="w-5 h-5" />
-              </button>
+              </a>
             </div>
           </div>
         </div>

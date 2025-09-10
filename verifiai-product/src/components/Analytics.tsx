@@ -1,12 +1,28 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { TrendingUp, TrendingDown, Users, Clock, CheckCircle, BarChart3, Download } from 'lucide-react'
-import { getAggregatedMetrics, TimeRange } from '../services/metricsService'
+import { getAggregatedMetrics, TimeRange, fetchServerEvents, computeAggregatedFromEvents } from '../services/metricsService'
 
 const Analytics: React.FC = () => {
   const [timeRange, setTimeRange] = useState('30d')
 
-  // Prefer real aggregated metrics if available; otherwise use mock data
-  const aggregated = useMemo(() => getAggregatedMetrics(timeRange as TimeRange), [timeRange])
+  // Prefer server metrics if available; otherwise use local aggregated metrics
+  const [serverAggregated, setServerAggregated] = useState<any | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      const events = await fetchServerEvents()
+      if (!cancelled) {
+        const agg = events ? computeAggregatedFromEvents(events, timeRange as TimeRange) : null
+        setServerAggregated(agg)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [timeRange])
+
+  const aggregated = useMemo(() => serverAggregated || getAggregatedMetrics(timeRange as TimeRange), [serverAggregated, timeRange])
 
   const mockMetrics = {
     totalVerifications: 1234,
@@ -203,7 +219,7 @@ const Analytics: React.FC = () => {
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Daily Verifications</h3>
           <div className="mb-4">
             <p className="text-3xl font-bold text-gray-900">
-              {formatNumber(metrics.dailyVerifications.reduce((a, b) => a + b, 0))}
+              {formatNumber(metrics.dailyVerifications.reduce((a: number, b: number) => a + b, 0))}
             </p>
             <p className="text-sm text-gray-600">Total verifications in the last 30 days</p>
           </div>
@@ -233,12 +249,12 @@ const Analytics: React.FC = () => {
         <div className="card">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Hourly Activity Pattern</h3>
           <div className="flex items-end space-x-1 h-48">
-            {metrics.hourlyActivity.map((item, index) => (
+            {metrics.hourlyActivity.map((item: { hour: string; verifications: number }, index: number) => (
               <div
                 key={index}
                 className="flex-1 bg-blue-200 hover:bg-blue-300 transition-colors rounded-t"
                 style={{
-                  height: `${(item.verifications / getMaxValue(metrics.hourlyActivity.map(h => h.verifications))) * 200}px`,
+                  height: `${(item.verifications / getMaxValue(metrics.hourlyActivity.map((h: { verifications: number }) => h.verifications))) * 200}px`,
                   minHeight: '4px'
                 }}
                 title={`${item.hour}: ${item.verifications} verifications`}

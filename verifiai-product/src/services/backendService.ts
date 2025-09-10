@@ -20,6 +20,7 @@ export async function uploadDocument(file: File, category?: string) {
   const res = await fetch(`${API_BASE}/api/documents`, {
     method: 'POST',
     body: form,
+    credentials: 'include',
   });
   if (!res.ok) throw new Error(`Upload failed (${res.status})`);
   return res.json() as Promise<{ id: string; name: string; size: number; type: string; category?: string }>;
@@ -30,6 +31,7 @@ export async function startAnalysis(params: { documentId: string; documentName: 
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify(params),
+    credentials: 'include',
   });
   if (!res.ok) throw new Error(`Analysis failed (${res.status})`);
   return res.json() as Promise<AnalysisResponse>;
@@ -41,6 +43,7 @@ export async function postMetricEvent(event: any) {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(event),
+      credentials: 'include',
     });
   } catch (e) {
     // best-effort

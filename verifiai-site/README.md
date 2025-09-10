@@ -74,3 +74,20 @@ The following pages are scaffolded and linked from the site footer:
 - `/security` – Security & Compliance overview (placeholder)
 
 A lightweight cookie consent banner is included via `components/ui/CookieBanner.tsx` and rendered in `app/layout.tsx`.
+
+---
+
+## Server-side AI (OpenAI)
+
+The analysis API (`app/api/analysis/route.ts`) calls OpenAI Chat Completions on the server.
+
+1. Add to `.env.local`:
+
+```
+OPENAI_API_KEY=sk-your_openai_key
+```
+
+2. Restart the dev server.
+
+3. The API falls back to a simulated response if the key is missing or the request fails.
+
