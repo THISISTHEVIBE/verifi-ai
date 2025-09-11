@@ -12,8 +12,31 @@ export async function POST(req: NextRequest) {
     }
     const body = await req.json();
     const { documentId, documentName, category, text } = body || {};
-    if (!documentId) {
-      return new Response(JSON.stringify({ error: "documentId_required" }), { status: 400 });
+
+    // Basic input validation
+    const errors: Array<{ field: string; code: string; message: string }> = [];
+    const allowedCategories = ["identity", "financial", "business", "academic"] as const;
+
+    if (typeof documentId !== "string" || documentId.trim().length === 0) {
+      errors.push({ field: "documentId", code: "invalid", message: "documentId must be a non-empty string" });
+    }
+    if (documentName !== undefined && typeof documentName !== "string") {
+      errors.push({ field: "documentName", code: "invalid", message: "documentName must be a string" });
+    }
+    if (typeof documentName === "string" && documentName.length > 256) {
+      errors.push({ field: "documentName", code: "too_long", message: "documentName must be <= 256 characters" });
+    }
+    if (category !== undefined && !allowedCategories.includes(String(category) as any)) {
+      errors.push({ field: "category", code: "unsupported", message: `category must be one of ${allowedCategories.join(", ")}` });
+    }
+    if (text !== undefined && typeof text !== "string") {
+      errors.push({ field: "text", code: "invalid", message: "text must be a string if provided" });
+    }
+    const MAX_TEXT = 20_000; // characters
+    const sanitizedText = typeof text === "string" ? text.slice(0, MAX_TEXT).replace(/[\u0000-\u001F\u007F]/g, " ") : undefined;
+
+    if (errors.length > 0) {
+      return new Response(JSON.stringify({ error: "validation_failed", errors }), { status: 400, headers: { "content-type": "application/json" } });
     }
 
     const startedAt = Date.now();
@@ -25,7 +48,7 @@ export async function POST(req: NextRequest) {
 
     if (apiKey) {
       try {
-        const prompt = `You are an assistant helping SMEs review contracts. Analyze the following (possibly brief) contract context or metadata and produce JSON with fields: outcome (one of verified, unverified, suspicious), confidence (0-100), and findings (array of {type: one of termination, renewal, liability, payment, other; risk: low|medium|high; summary: short German sentence}). Document name: ${documentName || "(unknown)"}. Category: ${category || "(unspecified)"}. Context: ${text || "(no text provided)"}. Answer with only JSON.`;
+        const prompt = `You are an assistant helping SMEs review contracts. Analyze the following (possibly brief) contract context or metadata and produce JSON with fields: outcome (one of verified, unverified, suspicious), confidence (0-100), and findings (array of {type: one of termination, renewal, liability, payment, other; risk: low|medium|high; summary: short German sentence}). Document name: ${typeof documentName === "string" && documentName ? documentName.slice(0, 200) : "(unknown)"}. Category: ${category || "(unspecified)"}. Context: ${sanitizedText || "(no text provided)"}. Answer with only JSON.`;
 
         const res = await fetch("https://api.openai.com/v1/chat/completions", {
           method: "POST",
