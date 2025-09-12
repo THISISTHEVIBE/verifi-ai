@@ -301,3 +301,7 @@ Copy this table and fill:
 - Security/Privacy docs live; legal pages published; DPA available
 - Monitoring, alerting, on-call, and rollback in place
 - GTM assets published; analytics tracking core funnel; first pilot logos committed
+
+
+
+Need to rephrase that plan it is way to complicated to be executed
