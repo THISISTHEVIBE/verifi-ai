@@ -5,9 +5,9 @@ A pragmatic, non-overcomplicated path to get from demo to a sellable MVP. Each s
 ---
 
 ## 1) Pick and scaffold the backend (Next.js API inside site)
-- [ ] Use `verifiai-site/` Next.js App Router `app/api/*` for backend routes (keeps monorepo simple for now).
-- [ ] Add a shared `verifiai-site/lib/db/` and `verifiai-site/lib/storage/` folder.
-- [ ] Add `.env.local` template (`DATABASE_URL`, `NEXTAUTH_SECRET`, `STRIPE_*`).
+- [x] Use `verifiai-site/` Next.js App Router `app/api/*` for backend routes (keeps monorepo simple for now).
+- [x] Add a shared `verifiai-site/lib/db/` and `verifiai-site/lib/storage/` folder.
+- [x] Add `.env.local` template (`DATABASE_URL`, `NEXTAUTH_SECRET`, `STRIPE_*`).
 
 ## 2) Database and models (Prisma + Postgres)
 - [ ] Add Prisma to `verifiai-site/`, configure `schema.prisma` with: `User`, `Org`, `Document`, `Analysis`, `Finding`, `Reminder`, `AuditLog`, `Subscription`.

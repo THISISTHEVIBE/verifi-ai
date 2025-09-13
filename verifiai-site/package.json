@@ -5,9 +5,14 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
-    "start": "next start"
+    "start": "next start",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@prisma/client": "^5.22.0",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
@@ -28,7 +33,9 @@
     "@types/react-dom": "^19",
     "autoprefixer": "^10.4.21",
     "postcss": "^8.5.6",
+    "prisma": "^5.22.0",
     "tailwindcss": "^4.1.12",
+    "tsx": "^4.19.1",
     "typescript": "^5"
   }
 }
