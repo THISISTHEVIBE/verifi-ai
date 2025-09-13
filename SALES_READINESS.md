@@ -258,32 +258,8 @@ Copy this table and fill:
 ---
 
 ## 12) Concrete Engineering Tasks (Initial Backlog)
-
-- Backend/API
-  - [ ] Create repo/package `api/` with FastAPI or Next API routes
-  - [ ] `/auth` (NextAuth) with GitHub+Google+Email
-  - [ ] `/documents` upload → S3 EU, size/type validation, virus scan
-  - [ ] `/analysis` start → queue job → store results
-  - [ ] `/reports/:id.pdf` generate and stream
-  - [ ] `/metrics` return dashboard aggregates
-
-- Frontend App (`verifiai-product/`)
-  - [ ] Remove direct `openai` usage; call `/analysis`
-  - [ ] Replace `metricsService.ts` with backend-driven metrics
-  - [ ] Auth gate + org switcher + settings page
-  - [ ] Export flows (PDF/CSV)
-
-- Site (`verifiai-site/`)
-  - [ ] Add `app/api/auth/[...nextauth]/route.ts` + providers config
-  - [ ] Add legal pages and link in `Footer`
-  - [ ] Add `/security`, `/blog`, `/case-studies` placeholders
-  - [ ] Add CTA form → email/CRM
-
-- Tooling
-  - [ ] Monorepo CI (lint/test/build) + preview deployments
-  - [ ] Sentry + OpenTelemetry setup
-
----
+\
+This section was removed to simplify the plan and avoid duplication with Section 2 (Engineering), Section 6 (Marketing Site), and Section 9 (Analytics).
 
 ## 13) Risks & Mitigations
 
@@ -301,7 +277,3 @@ Copy this table and fill:
 - Security/Privacy docs live; legal pages published; DPA available
 - Monitoring, alerting, on-call, and rollback in place
 - GTM assets published; analytics tracking core funnel; first pilot logos committed
-
-
-
-Need to rephrase that plan it is way to complicated to be executed
