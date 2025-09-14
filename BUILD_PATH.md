@@ -10,9 +10,9 @@ A pragmatic, non-overcomplicated path to get from demo to a sellable MVP. Each s
 - [x] Add `.env.local` template (`DATABASE_URL`, `NEXTAUTH_SECRET`, `STRIPE_*`).
 
 ## 2) Database and models (Prisma + Postgres)
-- [ ] Add Prisma to `verifiai-site/`, configure `schema.prisma` with: `User`, `Org`, `Document`, `Analysis`, `Finding`, `Reminder`, `AuditLog`, `Subscription`.
-- [ ] Generate client and run first migration.
-- [ ] Add simple seed script for local testing.
+- [x] Add Prisma to `verifiai-site/`, configure `schema.prisma` with: `User`, `Org`, `Document`, `Analysis`, `Finding`, `Reminder`, `AuditLog`, `Subscription`.
+- [x] Generate client and run first migration.
+- [x] Add simple seed script for local testing.
 
 ## 3) AuthN/AuthZ (NextAuth minimal viable)
 - [ ] Create `app/api/auth/[...nextauth]/route.ts` with GitHub + Google + Email.

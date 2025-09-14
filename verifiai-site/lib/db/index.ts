@@ -1,22 +1,11 @@
-// Database connection and utilities
-// This will be expanded in Step 2 with Prisma client
+import { PrismaClient } from '@prisma/client'
 
-export interface DatabaseConfig {
-  url: string;
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined
 }
 
-// Placeholder for database connection
-// Will be replaced with Prisma client in Step 2
-export const db = {
-  // Placeholder methods - will be implemented with Prisma
-  user: {},
-  org: {},
-  document: {},
-  analysis: {},
-  finding: {},
-  reminder: {},
-  auditLog: {},
-  subscription: {},
-};
+export const db = globalForPrisma.prisma ?? new PrismaClient()
 
-export default db;
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = db
+
+export default db
