@@ -1,11 +1,11 @@
 import { NextRequest } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { requireAuth } from "@/lib/auth-utils";
 
 // TODO: replace with S3/GCS storage and virus scan
 export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions as any);
-  if (!session) {
+  try {
+    const { user } = await requireAuth();
+  } catch (error) {
     return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401 });
   }
   const contentType = req.headers.get("content-type") || "";
