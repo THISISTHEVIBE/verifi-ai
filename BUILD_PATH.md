@@ -15,9 +15,9 @@ A pragmatic, non-overcomplicated path to get from demo to a sellable MVP. Each s
 - [x] Add simple seed script for local testing.
 
 ## 3) AuthN/AuthZ (NextAuth minimal viable)
-- [ ] Create `app/api/auth/[...nextauth]/route.ts` with GitHub + Google + Email.
-- [ ] Store sessions in DB (Prisma adapter).
-- [ ] Add `Org` membership and role field; default org on first login.
+- [x] Create `app/api/auth/[...nextauth]/route.ts` with GitHub + Google + Email.
+- [x] Store sessions in DB (Prisma adapter).
+- [x] Add `Org` membership and role field; default org on first login.
 - [ ] Protect API routes with helper `getServerSession()`.
 
 ## 4) File upload pipeline (contracts)
