@@ -3,6 +3,7 @@ import { requireAuth } from "@/lib/auth-utils";
 import { db } from "@/lib/db";
 import { storage } from "@/lib/storage";
 import { scanFile } from "@/lib/virus-scan";
+import { createAuditLog, AuditActions } from "@/lib/audit";
 
 export async function POST(req: NextRequest) {
   try {
@@ -73,6 +74,21 @@ export async function POST(req: NextRequest) {
         mimeType: file.type,
         status: "UPLOADED"
       }
+    });
+
+    // Create audit log
+    await createAuditLog({
+      userId: user.id,
+      documentId: document.id,
+      action: AuditActions.DOCUMENT_UPLOADED,
+      details: {
+        filename: file.name,
+        size: file.size,
+        mimeType: file.type,
+        category,
+        orgId: defaultOrg.id
+      },
+      request: req
     });
 
     return new Response(

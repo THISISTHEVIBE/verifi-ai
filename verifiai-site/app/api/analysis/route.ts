@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { requireAuth } from "@/lib/auth-utils";
 import { analyzeContract } from "@/lib/ai/analyzeContract";
 import { db } from "@/lib/db";
+import { createAuditLog, AuditActions } from "@/lib/audit";
 
 export async function POST(req: NextRequest) {
   try {
@@ -59,12 +60,39 @@ export async function POST(req: NextRequest) {
       }), { status: 200 });
     }
 
+    // Create audit log for analysis start
+    await createAuditLog({
+      userId: user.id,
+      documentId,
+      action: AuditActions.ANALYSIS_STARTED,
+      details: {
+        documentName: documentName || document.originalName,
+        category: category || "contract",
+        orgId: document.orgId
+      },
+      request: req
+    });
+
     // Start contract analysis
     const analysisResult = await analyzeContract({
       documentId,
       documentName: documentName || document.originalName,
       category: category || "contract",
       text
+    });
+
+    // Create audit log for analysis completion
+    await createAuditLog({
+      userId: user.id,
+      documentId,
+      action: analysisResult.status === "COMPLETED" ? AuditActions.ANALYSIS_COMPLETED : AuditActions.ANALYSIS_FAILED,
+      details: {
+        analysisId: analysisResult.id,
+        riskScore: analysisResult.riskScore,
+        findingsCount: analysisResult.findings?.length || 0,
+        orgId: document.orgId
+      },
+      request: req
     });
 
     return new Response(

@@ -1,13 +1,18 @@
 export type AnalysisResponse = {
   id: string;
   documentId: string;
-  documentName: string;
-  category?: string;
-  outcome: 'verified' | 'unverified' | 'suspicious' | 'failed';
-  confidence: number;
-  findings: Array<{ type: string; risk: 'low' | 'medium' | 'high'; summary: string }>;
-  startedAt: number;
-  completedAt: number;
+  status: 'COMPLETED' | 'ERROR';
+  riskScore: number;
+  summary: string;
+  findings: Array<{
+    type: "RISK" | "COMPLIANCE" | "LEGAL" | "FINANCIAL" | "OPERATIONAL";
+    severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+    title: string;
+    description: string;
+    location?: string;
+    suggestion?: string;
+  }>;
+  completedAt: Date;
 };
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3000';
@@ -23,7 +28,7 @@ export async function uploadDocument(file: File, category?: string) {
     credentials: 'include',
   });
   if (!res.ok) throw new Error(`Upload failed (${res.status})`);
-  return res.json() as Promise<{ id: string; name: string; size: number; type: string; category?: string }>;
+  return res.json() as Promise<{ id: string; filename: string; size: number; type: string; category?: string; status: string; uploadedAt: string }>;
 }
 
 export async function startAnalysis(params: { documentId: string; documentName: string; category?: string }) {

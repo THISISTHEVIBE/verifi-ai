@@ -18,30 +18,30 @@ A pragmatic, non-overcomplicated path to get from demo to a sellable MVP. Each s
 - [x] Create `app/api/auth/[...nextauth]/route.ts` with GitHub + Google + Email.
 - [x] Store sessions in DB (Prisma adapter).
 - [x] Add `Org` membership and role field; default org on first login.
-- [ ] Protect API routes with helper `getServerSession()`.
+- [x] Protect API routes with helper `getServerSession()`.
 
 ## 4) File upload pipeline (contracts)
-- [ ] Create `app/api/documents/route.ts` to accept PDF/DOCX.
-- [ ] Validate size/type; store to disk locally (dev) and abstract via `lib/storage/`.
-- [ ] Stub virus scan function (sync) with TODO for production.
-- [ ] Persist `Document` row with `orgId`, `uploaderId`, `path`, `status`.
+- [x] Create `app/api/documents/route.ts` to accept PDF/DOCX.
+- [x] Validate size/type; store to disk locally (dev) and abstract via `lib/storage/`.
+- [x] Stub virus scan function (sync) with TODO for production.
+- [x] Persist `Document` row with `orgId`, `uploaderId`, `path`, `status`.
 
 ## 5) Server-side AI analysis endpoint
-- [ ] Create `app/api/analysis/route.ts` POST: takes `documentId`, enqueues synchronous stub worker for now.
-- [ ] Add `lib/ai/analyzeContract.ts` that calls provider via server-side SDK using env key.
-- [ ] Store `Analysis` and `Finding` records; return job status.
+- [x] Create `app/api/analysis/route.ts` POST: takes `documentId`, enqueues synchronous stub worker for now.
+- [x] Add `lib/ai/analyzeContract.ts` that calls provider via server-side SDK using env key.
+- [x] Store `Analysis` and `Finding` records; return job status.
 
 ## 6) Frontend app wiring (`verifiai-product/`)
-- [ ] Replace direct OpenAI calls with fetches to `/api/analysis`.
-- [ ] Implement auth gate (if unauthenticated, redirect to `verifiai-site` sign-in or show modal).
-- [ ] Add simple Upload page → call `/api/documents` → poll analysis status → render findings.
+- [x] Replace direct OpenAI calls with fetches to `/api/analysis`.
+- [x] Implement auth gate (if unauthenticated, redirect to `verifiai-site` sign-in or show modal).
+- [x] Add simple Upload page → call `/api/documents` → poll analysis status → render findings.
 
 ## 7) Metrics and audit basics
-- [ ] Create `app/api/metrics/route.ts` to return counts for dashboard (docs analyzed, avg risk score, etc.).
-- [ ] Write minimal `AuditLog` on document upload and analysis complete.
+- [x] Create `app/api/metrics/route.ts` to return counts for dashboard (docs analyzed, avg risk score, etc.).
+- [x] Write minimal `AuditLog` on document upload and analysis complete.
 
 ## 8) Exports (v1)
-- [ ] Add `app/api/reports/[id]/route.ts` to stream a basic PDF (server-side generated HTML → PDF) and CSV of findings.
+- [x] Add `app/api/reports/[id]/route.ts` to stream a basic PDF (server-side generated HTML → PDF) and CSV of findings.
 
 ## 9) Billing guard (Stripe minimal)
 - [ ] Add simple `POST /api/billing/checkout` to create Checkout Session for Pay‑per‑Contract and Subscription.

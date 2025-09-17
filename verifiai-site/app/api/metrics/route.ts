@@ -1,38 +1,94 @@
 import { NextRequest } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-
-// Temporary in-memory store for demo; replace with DB in future steps
-let demoEvents: any[] = [];
+import { requireAuth } from "@/lib/auth-utils";
+import { db } from "@/lib/db";
 
 export async function GET() {
-  const session = await getServerSession(authOptions as any);
-  if (!session) {
-    return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401 });
+  try {
+    const { user } = await requireAuth();
+    
+    // Get user's organizations
+    const orgIds = user.orgMemberships.map(m => m.org.id);
+    
+    // Get metrics for user's organizations
+    const [
+      totalDocuments,
+      totalAnalyses,
+      completedAnalyses,
+      avgRiskScore,
+      recentDocuments,
+      riskDistribution
+    ] = await Promise.all([
+      // Total documents uploaded
+      db.document.count({
+        where: { orgId: { in: orgIds } }
+      }),
+      
+      // Total analyses started
+      db.analysis.count({
+        where: { 
+          document: { orgId: { in: orgIds } }
+        }
+      }),
+      
+      // Completed analyses
+      db.analysis.count({
+        where: { 
+          document: { orgId: { in: orgIds } },
+          status: "COMPLETED"
+        }
+      }),
+      
+      // Average risk score
+      db.analysis.aggregate({
+        where: { 
+          document: { orgId: { in: orgIds } },
+          status: "COMPLETED",
+          riskScore: { not: null }
+        },
+        _avg: { riskScore: true }
+      }),
+      
+      // Recent documents (last 30 days)
+      db.document.count({
+        where: { 
+          orgId: { in: orgIds },
+          createdAt: {
+            gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+          }
+        }
+      }),
+      
+      // Risk score distribution
+      db.analysis.groupBy({
+        by: ['riskScore'],
+        where: { 
+          document: { orgId: { in: orgIds } },
+          status: "COMPLETED",
+          riskScore: { not: null }
+        },
+        _count: true
+      })
+    ]);
+
+    return new Response(
+      JSON.stringify({
+        totalDocuments,
+        totalAnalyses,
+        completedAnalyses,
+        avgRiskScore: avgRiskScore._avg.riskScore || 0,
+        recentDocuments,
+        successRate: totalAnalyses > 0 ? (completedAnalyses / totalAnalyses * 100) : 0,
+        riskDistribution: {
+          low: riskDistribution.filter(r => r.riskScore! <= 30).reduce((sum, r) => sum + r._count, 0),
+          medium: riskDistribution.filter(r => r.riskScore! > 30 && r.riskScore! <= 70).reduce((sum, r) => sum + r._count, 0),
+          high: riskDistribution.filter(r => r.riskScore! > 70).reduce((sum, r) => sum + r._count, 0)
+        }
+      }),
+      { status: 200, headers: { "content-type": "application/json" } }
+    );
+  } catch (error) {
+    console.error("Metrics fetch failed:", error);
+    return new Response(JSON.stringify({ error: "metrics_failed" }), { status: 500 });
   }
-  return new Response(
-    JSON.stringify({
-      totalVerifications: demoEvents.length,
-      events: demoEvents.slice(-100),
-    }),
-    { status: 200, headers: { "content-type": "application/json" } }
-  );
 }
 
-export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions as any);
-  if (!session) {
-    return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401 });
-  }
-  try {
-    const body = await req.json();
-    if (!body || typeof body !== "object") {
-      return new Response(JSON.stringify({ error: "invalid_body" }), { status: 400 });
-    }
-    demoEvents.push({ ...body, ts: Date.now() });
-    if (demoEvents.length > 10000) demoEvents = demoEvents.slice(-5000);
-    return new Response(JSON.stringify({ ok: true }), { status: 200 });
-  } catch (e) {
-    return new Response(JSON.stringify({ error: "bad_json" }), { status: 400 });
-  }
-}

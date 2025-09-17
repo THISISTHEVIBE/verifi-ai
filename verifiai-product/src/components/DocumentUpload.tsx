@@ -21,15 +21,15 @@ interface UploadedFile {
 const DocumentUpload: React.FC = () => {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
   const [isDragOver, setIsDragOver] = useState(false)
-  const [verificationType, setVerificationType] = useState('identity')
+  const [verificationType, setVerificationType] = useState('contract')
   // Track when each file started (upload begin) to compute processing duration
   const startTimesRef = useRef<Record<string, number>>({})
 
   const verificationTypes = [
-    { id: 'identity', label: 'Identity Documents', description: 'Passports, ID cards, driver licenses' },
-    { id: 'financial', label: 'Financial Documents', description: 'Bank statements, utility bills' },
-    { id: 'business', label: 'Business Documents', description: 'Company registrations, contracts' },
-    { id: 'academic', label: 'Academic Documents', description: 'Diplomas, certificates, transcripts' }
+    { id: 'contract', label: 'General Contracts', description: 'Service agreements, terms & conditions' },
+    { id: 'employment', label: 'Employment Contracts', description: 'Job agreements, NDAs, non-competes' },
+    { id: 'lease', label: 'Lease Agreements', description: 'Rental contracts, property leases' },
+    { id: 'purchase', label: 'Purchase Agreements', description: 'Sales contracts, procurement deals' }
   ]
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -108,12 +108,16 @@ const DocumentUpload: React.FC = () => {
       const uploaded = await uploadDocument(file, verificationType)
       const result = await startAnalysis({
         documentId: uploaded.id,
-        documentName: uploaded.name,
+        documentName: uploaded.filename,
         category: verificationType,
       })
 
-      // Update with results
-      const uiStatus: 'verified' | 'unverified' | 'suspicious' = (result.outcome === 'failed' ? 'unverified' : (result.outcome as any))
+      // Update with results - map risk score to verification status
+      const uiStatus: 'verified' | 'unverified' | 'suspicious' = 
+        result.status === 'ERROR' ? 'unverified' :
+        result.riskScore <= 30 ? 'verified' :
+        result.riskScore <= 70 ? 'suspicious' : 'unverified'
+        
       setUploadedFiles(prev => prev.map(f => 
         f.id === fileId 
           ? { 
@@ -121,9 +125,9 @@ const DocumentUpload: React.FC = () => {
               status: 'completed',
               progress: 100,
               verificationResult: {
-                confidence: result.confidence,
+                confidence: Math.max(0, 100 - result.riskScore), // Convert risk score to confidence
                 status: uiStatus,
-                details: result.findings?.map((ff) => ff.summary) ?? []
+                details: result.findings?.map((finding) => `${finding.title}: ${finding.description}`) ?? [result.summary]
               }
             }
           : f
@@ -131,14 +135,15 @@ const DocumentUpload: React.FC = () => {
 
       // Record metrics event
       const startedAt = startTimesRef.current[fileId] || Date.now()
-      const outcome: VerificationOutcome = result.outcome
+      const outcome: VerificationOutcome = uiStatus === 'verified' ? 'verified' : 
+                                         uiStatus === 'suspicious' ? 'suspicious' : 'unverified'
       addMetricsEvent({
         id: fileId,
-        documentName: uploaded?.name || file.name,
+        documentName: uploaded?.filename || file.name,
         bytes: file.size,
         category: verificationType as VerificationCategory,
         outcome,
-        confidence: result.confidence,
+        confidence: Math.max(0, 100 - result.riskScore),
         startedAt,
         completedAt: Date.now(),
       })
@@ -221,13 +226,13 @@ const DocumentUpload: React.FC = () => {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Document Upload & Verification</h2>
-        <p className="text-gray-600">Upload documents to verify their authenticity using our AI-powered verification system.</p>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Contract Upload & Analysis</h2>
+        <p className="text-gray-600">Upload contracts to analyze their risks and compliance using our AI-powered analysis system.</p>
       </div>
 
-      {/* Verification Type Selection */}
+      {/* Contract Type Selection */}
       <div className="card">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Select Verification Type</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Select Contract Type</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {verificationTypes.map((type) => (
             <button
@@ -265,12 +270,12 @@ const DocumentUpload: React.FC = () => {
             Drop files here or click to browse
           </h4>
           <p className="text-gray-600 mb-4">
-            Support for JPG and PNG files up to 10MB each
+            Support for PDF and DOCX files up to 50MB each
           </p>
           <input
             type="file"
             multiple
-            accept=".jpg,.jpeg,.png"
+            accept=".pdf,.docx,.doc"
             onChange={handleFileInput}
             className="hidden"
             id="file-upload"
@@ -342,10 +347,10 @@ const DocumentUpload: React.FC = () => {
                   )}
                 </div>
 
-                {/* Verification Details */}
+                {/* Analysis Details */}
                 {file.verificationResult && (
                   <div className="mt-3 pt-3 border-t border-gray-200">
-                    <p className="text-sm font-medium text-gray-700 mb-2">Verification Details:</p>
+                    <p className="text-sm font-medium text-gray-700 mb-2">Analysis Results:</p>
                     <ul className="space-y-1">
                       {file.verificationResult.details.map((detail: string, index: number) => (
                         <li key={index} className="text-sm text-gray-600 flex items-center space-x-2">
