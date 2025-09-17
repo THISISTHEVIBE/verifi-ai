@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { requireAuth } from "@/lib/auth-utils";
 import { db } from "@/lib/db";
 import { createAuditLog, AuditActions } from "@/lib/audit";
+import { canExportReports } from "@/lib/billing";
 
 export async function GET(
   req: NextRequest,
@@ -12,6 +13,15 @@ export async function GET(
     const analysisId = params.id;
     const url = new URL(req.url);
     const format = url.searchParams.get('format') || 'pdf';
+
+    // Check billing entitlements for export access
+    const exportCheck = await canExportReports(user);
+    if (!exportCheck.allowed) {
+      return new Response(JSON.stringify({ 
+        error: "export_not_allowed",
+        message: exportCheck.reason 
+      }), { status: 403 });
+    }
 
     // Verify analysis exists and user has access
     const analysis = await db.analysis.findFirst({

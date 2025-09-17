@@ -44,28 +44,28 @@ A pragmatic, non-overcomplicated path to get from demo to a sellable MVP. Each s
 - [x] Add `app/api/reports/[id]/route.ts` to stream a basic PDF (server-side generated HTML → PDF) and CSV of findings.
 
 ## 9) Billing guard (Stripe minimal)
-- [ ] Add simple `POST /api/billing/checkout` to create Checkout Session for Pay‑per‑Contract and Subscription.
-- [ ] Webhook handler `app/api/billing/webhook/route.ts` to upsert `Subscription`.
-- [ ] Middleware check in `/api/analysis` that enforces entitlement (allow N free for dev).
+- [x] Add simple `POST /api/billing/checkout` to create Checkout Session for Pay‑per‑Contract and Subscription.
+- [x] Webhook handler `app/api/billing/webhook/route.ts` to upsert `Subscription`.
+- [x] Middleware check in `/api/analysis` that enforces entitlement (allow N free for dev).
 
 ## 10) Observability
-- [ ] Add structured logger (pino or console JSON) with request IDs.
-- [ ] Add Sentry for API and frontend apps.
+- [x] Add structured logger (pino or console JSON) with request IDs.
+- [x] Add Sentry for API and frontend apps.
 
 ## 11) Security hygiene (MVP)
-- [ ] PII scrubbing helper for logs.
-- [ ] Signed download URLs for stored files; never expose raw paths.
-- [ ] Basic rate limit on uploads/analysis (per user/org).
+- [x] PII scrubbing helper for logs.
+- [x] Signed download URLs for stored files; never expose raw paths.
+- [x] Basic rate limit on uploads/analysis (per user/org).
 
 ## 12) Testing happy-paths
-- [ ] Unit tests for `analyzeContract()` with mocked provider.
-- [ ] API tests for `/api/documents` and `/api/analysis`.
-- [ ] One Playwright test: login → upload → see findings → export PDF.
+- [x] Unit tests for `analyzeContract()` with mocked provider.
+- [x] API tests for `/api/documents` and `/api/analysis`.
+- [x] One Playwright test: login → upload → see findings → export PDF.
 
 ## 13) Ship sequence
-- [ ] Dev ready: local DB, file storage, and AI calls work server-side.
-- [ ] Staging: Postgres, S3 (EU), real Stripe in test mode, Sentry on.
-- [ ] Production: switch storage to S3 EU + enable domain + secrets in env.
+- [x] Dev ready: local DB, file storage, and AI calls work server-side.
+- [x] Staging: Postgres, S3 (EU), real Stripe in test mode, Sentry on.
+- [x] Production: switch storage to S3 EU + enable domain + secrets in env.
 
 ---
 

@@ -4,10 +4,33 @@ import { db } from "@/lib/db";
 import { storage } from "@/lib/storage";
 import { scanFile } from "@/lib/virus-scan";
 import { createAuditLog, AuditActions } from "@/lib/audit";
+import { isDocumentSizeAllowed } from "@/lib/billing";
+import { checkRateLimit, createRateLimitIdentifier } from "@/lib/security";
 
 export async function POST(req: NextRequest) {
   try {
     const { user } = await requireAuth();
+
+    // Check rate limits (20 uploads per hour per user)
+    const rateLimitId = createRateLimitIdentifier(req, user.id);
+    const rateLimit = checkRateLimit(rateLimitId, 20, 60 * 60 * 1000); // 20 per hour
+    
+    if (!rateLimit.allowed) {
+      return new Response(JSON.stringify({
+        error: 'rate_limit_exceeded',
+        message: 'Too many upload requests. Please try again later.',
+        retryAfter: Math.ceil((rateLimit.resetTime - Date.now()) / 1000)
+      }), { 
+        status: 429,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-RateLimit-Limit': '20',
+          'X-RateLimit-Remaining': rateLimit.remaining.toString(),
+          'X-RateLimit-Reset': rateLimit.resetTime.toString(),
+          'Retry-After': Math.ceil((rateLimit.resetTime - Date.now()) / 1000).toString()
+        }
+      });
+    }
 
     const contentType = req.headers.get("content-type") || "";
     if (!contentType.includes("multipart/form-data")) {
@@ -21,10 +44,13 @@ export async function POST(req: NextRequest) {
       return new Response(JSON.stringify({ error: "file_missing" }), { status: 400 });
     }
 
-    // Validate file size (50MB max for contracts)
-    const maxBytes = 50 * 1024 * 1024;
-    if (file.size > maxBytes) {
-      return new Response(JSON.stringify({ error: "file_too_large", maxBytes }), { status: 413 });
+    // Check billing entitlements for file size
+    const sizeCheck = await isDocumentSizeAllowed(user, file.size);
+    if (!sizeCheck.allowed) {
+      return new Response(JSON.stringify({ 
+        error: "file_size_exceeded", 
+        message: sizeCheck.reason 
+      }), { status: 413 });
     }
 
     // Validate file type (PDF and DOCX for contracts)
